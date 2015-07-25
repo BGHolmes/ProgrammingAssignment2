@@ -2,7 +2,7 @@
 #
 #  cachematrix.R
 #  
-#  20150725 BGH; iaugmented with function definitions.
+#  20150725 BGH; augmented with function definitions, as assigned.
 #
 #------------------------------------------------------------------------------
 #
@@ -22,7 +22,26 @@
 #  its inverse.
 #  
 #  For this assignment, assume that the matrix supplied is always invertible.
-#  
+#
+#------------------------------------------------------------------------------
+#
+#  Example use:
+#
+#	> source( "cachematrix.R" )
+#	> Matrix <- matrix( stats::rnorm(16),ncol=4,nrow=4 )
+#	> InverseDirect <- solve(Matrix)
+#	> inverseCalc <- makeCacheMatrix(Matrix)
+#	> InverseCached <- cacheSolve(inverseCalc)
+#	> InverseReused <- cacheSolve(inverseCalc)
+#	getting cached data
+#	> all(InverseDirect==InverseCached)
+#	[1] TRUE
+#	> all(InverseDirect==InverseReused)
+#	[1] TRUE
+#	> all(Matrix == InverseReused)
+#	[1] FALSE
+#	> 
+#
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -34,17 +53,17 @@
 
 makeCacheMatrix <- function(x = matrix()) {
 
-        solved <- NULL
+        inverseCached <- NULL
         set <- function(y) {
                 x <<- y
-                solved <<- NULL
+                inverseCached <<- NULL
         }
         get <- function() x
-        setsolved <- function(solvedGiven) solved <<- solvedGiven
-        getsolved <- function() solved
+        setinverse <- function(inverseGiven) inverseCached <<- inverseGiven
+        getinverse <- function() inverseCached
         list(set = set, get = get,
-             setsolved = setsolved,
-             getsolved = getsolved)
+             setinverse = setinverse,
+             getinverse = getinverse)
 
 }
 
@@ -59,15 +78,15 @@ makeCacheMatrix <- function(x = matrix()) {
 
 cacheSolve <- function(x, ...) {
 
-        solution <- x$getsolved()
-        if(!is.null(solution)) {
+        result <- x$getinverse()
+        if(!is.null(result)) {
                 message("getting cached data")
-                return(solution)
+                return(result)
         }
         data <- x$get()
-        solution <- solve(data, ...)
-        x$setsolved(solution)
-        solution
+        result <- solve(data, ...)
+        x$setinverse(result)
+        result
 
 }
 
